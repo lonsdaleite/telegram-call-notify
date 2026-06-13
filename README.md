@@ -23,7 +23,6 @@ pip install -r requirements.txt
 cp .env.example .env
 # fill TG_API_ID, TG_API_HASH, NTFY_URL
 chmod 600 .env
-chmod +x start.sh stop.sh
 ```
 
 ## Run
