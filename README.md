@@ -23,9 +23,51 @@ pip install -r requirements.txt
 cp .env.example .env
 # fill TG_API_ID, TG_API_HASH, NTFY_URL
 chmod 600 .env
+chmod +x start.sh stop.sh
 ```
 
 ## Run
+
+### First login (interactive)
+
+Run once in foreground to enter the Telegram code. A `.session` file is created next to `main.py`.
+
+```bash
+./start.sh
+```
+
+Or with debug (no ntfy):
+
+```bash
+./start.sh --debug
+```
+
+`--debug` can go before or after the log file:
+
+```bash
+./start.sh --debug /var/log/tg-call-notify.log
+./start.sh /var/log/tg-call-notify.log --debug
+```
+
+### Background (daemon)
+
+`start.sh` stops any existing instance, waits for `api.telegram.org:443`, activates `.venv` (or `venv`), then starts the service.
+
+```bash
+./start.sh /var/log/tg-call-notify.log
+```
+
+Stop:
+
+```bash
+./stop.sh
+# or with the same log file:
+./stop.sh /var/log/tg-call-notify.log
+```
+
+Without a log file argument, `start.sh` runs in foreground; with a log path it uses `nohup` and appends output to the file.
+
+### Manual run
 
 From any directory:
 
@@ -33,21 +75,11 @@ From any directory:
 ~/apps/telegram-call-notify/.venv/bin/python ~/apps/telegram-call-notify/main.py
 ```
 
-Or after `source .venv/bin/activate`:
-
-```bash
-python /path/to/telegram-call-notify/main.py
-```
-
-Debug mode (no ntfy, logs to console):
+Debug mode:
 
 ```bash
 python /path/to/telegram-call-notify/main.py --debug
 ```
-
-On first run, enter the Telegram login code. A `.session` file is created next to `main.py`.
-
-Keep the process running with your preferred method (screen, tmux, nohup, etc.).
 
 ## Configuration
 
@@ -65,7 +97,7 @@ All settings are read from `.env` in the same directory as `main.py`.
 | `NTFY_PRIORITY` | no | `high` | ntfy priority header |
 | `DEBUG` | no | `false` | Local logging, no ntfy |
 
-CLI flag `--debug` overrides `DEBUG` from `.env`.
+CLI flag `--debug` (in `main.py` or `./start.sh --debug`) overrides `DEBUG` from `.env`.
 
 ## Behavior
 
