@@ -103,6 +103,7 @@ CLI flag `--debug` (in `main.py` or `./start.sh --debug`) overrides `DEBUG` from
 - On incoming call (`PhoneCallRequested`): start sending notifications every `NOTIFY_INTERVAL` seconds, up to `NOTIFY_COUNT` times.
 - On answer or hangup (`PhoneCallAccepted`, `PhoneCall`, `PhoneCallDiscarded`): stop immediately.
 - Notification text: `Входящий звонок от {caller name}`.
+- On network loss: reconnects to Telegram indefinitely, retrying every 5 seconds; the process does not exit.
 
 ## Security
 

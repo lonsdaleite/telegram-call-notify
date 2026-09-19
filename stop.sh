@@ -4,17 +4,25 @@ LOG_FILE=$1
 
 bot_file_name="main.py"
 
-dir=$(dirname "$0")
+dir=$(cd "$(dirname "$0")" && pwd)
+
+# Match only the interpreter process itself: the pattern is anchored to the start
+# of the command line, so shells or editors that merely mention the path are skipped.
+find_pids() {
+    pgrep -f "^python3 -u $dir/$bot_file_name"
+}
 
 stop_service() {
-    pid=$(ps aux | grep "$dir/$bot_file_name" | grep -vw grep | awk '{print $2}')
+    pid=$(find_pids)
 
     if [ -n "$pid" ]; then
-        kill "$pid"
+        # shellcheck disable=SC2086
+        kill $pid
         sleep 1
-        pid=$(ps aux | grep "$dir/$bot_file_name" | grep -vw grep | awk '{print $2}')
+        pid=$(find_pids)
         if [ -n "$pid" ]; then
-            kill -9 "$pid"
+            # shellcheck disable=SC2086
+            kill -9 $pid
             echo "Service killed"
         else
             echo "Service stopped"

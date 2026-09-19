@@ -23,6 +23,8 @@ load_dotenv(APP_DIR / ".env")
 
 logger = logging.getLogger("tg-call-notify")
 
+RECONNECT_DELAY = 5
+
 
 @dataclass
 class Config:
@@ -172,7 +174,13 @@ async def main() -> None:
 
     active_tasks: dict[int, asyncio.Task] = {}
 
-    client = TelegramClient(str(cfg.session_path), cfg.api_id, cfg.api_hash)
+    client = TelegramClient(
+        str(cfg.session_path),
+        cfg.api_id,
+        cfg.api_hash,
+        connection_retries=None,
+        retry_delay=RECONNECT_DELAY,
+    )
 
     @client.on(events.Raw)
     async def on_raw_update(update) -> None:
@@ -224,7 +232,15 @@ async def main() -> None:
     logger.info("Logged in as %s (id=%s)", getattr(me, "username", None) or me.first_name, me.id)
     logger.info("Listening for incoming calls…")
 
-    await client.run_until_disconnected()
+    while True:
+        try:
+            if not client.is_connected():
+                await client.connect()
+            await client.run_until_disconnected()
+            break
+        except OSError as exc:
+            logger.error("Connection lost: %s — reconnecting in %ss", exc, RECONNECT_DELAY)
+            await asyncio.sleep(RECONNECT_DELAY)
 
 
 if __name__ == "__main__":

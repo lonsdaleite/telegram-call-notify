@@ -22,7 +22,7 @@ done
 
 bot_file_name="main.py"
 
-dir=$(dirname "$0")
+dir=$(cd "$(dirname "$0")" && pwd)
 "$dir/stop.sh" "$LOG_FILE"
 
 if [ -n "$LOG_FILE" ]; then
